@@ -6,6 +6,25 @@ exports.uploadImage = async (req, res) => {
 
   const files = req.files
 
+  //backend Validation
+  // Check if any required fields are missing
+  if (!location || !date || !description || !files || files.length === 0) {
+
+    console.log("error: provide all required fields and at least one image file.")
+    return res.status(400).json({ error: "Please provide all required fields and at least one image file." });
+  }
+
+  const currentDate = new Date();
+  const memoryDate = new Date(date);
+
+  //backend Validation
+  // Check if date is not in future
+
+  if (memoryDate > currentDate) {
+    console.log("error: Memory date cannot be a future date.")
+    return res.status(400).json({ error: "Memory date cannot be a future date." });
+  }
+
   const savedFilenames = []
 
   for (const file of files) {
@@ -21,7 +40,7 @@ exports.uploadImage = async (req, res) => {
       date: date,
       description: description
     });
-    res.json({ status: "ok" });
+    res.json({ status: "Memory added successfully" });
   } catch (error) {
     res.json({ status: error });
   }
@@ -62,6 +81,26 @@ exports.updateImages = async (req, res) => {
       description: req.body.description
     }
 
+    //backend Validation
+  // Check if any required fields are missing
+  if (!req.body.location || !req.body.date || !req.body.description || !savedFilenames || savedFilenames.length === 0) {
+
+    console.log("error: provide all required fields and at least one image file.")
+    return res.status(400).json({ error: "Please provide all required fields and at least one image file." });
+  }
+
+  const currentDate = new Date();
+  const memoryDate = new Date(req.body.date);
+
+  //backend Validation
+  // Check if date is not in future
+
+  if (memoryDate > currentDate) {
+    console.log("error: Memory date cannot be a future date.")
+    return res.status(400).json({ error: "Memory date cannot be a future date." });
+  }
+
+
     const updatedImage = await Image.findByIdAndUpdate(id, updateBody)
 
     res.status(200).json({ status: 'ok', data: updatedImage })
@@ -80,6 +119,26 @@ exports.deleteImages = async (req, res) => {
       return res.status(404).json({ error: "Image not found" });
     }
     res.json({ message: "Image deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+exports.updateViewCount = async (req, res) => {
+  try {
+    const imageId = req.params.id;
+    // Find the image by ID and update its viewCount field
+    const updatedImage = await Image.findByIdAndUpdate(
+      imageId,
+      { $inc: { viewCount: 1 } }, // Increment the viewCount field by 1
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedImage) {
+      return res.status(404).json({ error: "Memory not found" });
+    }
+
+    res.json({ message: "View count updated successfully", image: updatedImage });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

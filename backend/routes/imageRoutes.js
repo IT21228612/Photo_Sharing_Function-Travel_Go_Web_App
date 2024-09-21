@@ -1,4 +1,4 @@
-const {uploadImage,getImages,updateImages,deleteImages} = require('../controllers/imageController')
+const {uploadImage,getImages,updateImages,deleteImages,updateViewCount} = require('../controllers/imageController')
 
 const express = require('express')
 const router = express.Router()
@@ -41,6 +41,11 @@ router.patch('/:id', upload.array("image", 10),  async(req,res)=> {
 // Delete Image Endpoint
 router.delete("/:id", async (req, res) => {
     await deleteImages(req,res)
+});
+
+// Increment View Count Endpoint
+router.patch("/increment-view/:id", async (req, res) => {
+  await updateViewCount(req, res);
 });
 
 
